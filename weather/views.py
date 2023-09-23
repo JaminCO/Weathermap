@@ -8,27 +8,39 @@ def index(request):
 
     if request.method == 'POST':
         form = CityForm(request.POST)
-        form.save()
+        name = form.data["name"]
+        cities = City.objects.filter(name=name).first()
+        if cities != None:
+            print("Already exists")
+        else:
+            form.save()
 
     form = CityForm()
 
     cities = City.objects.all()
-
-    weather_data = []
+    c_update = set()
 
     for city in cities:
+        c_update.add(city.name)
+    weather_data = []
 
-        r = requests.get(url.format(city)).json()
+    for city in c_update:
+
+        r = requests.get(url.format(str(city).title())).json()
         print(r)
+        
+        if r["cod"] != 200:
+            data = City.objects.filter(name=city).first()
+            data.delete()
+        else:
+            city_weather = {
+                'city' : str(city).title(),
+                'temperature' : r['main']['temp'],
+                'description' : r['weather'][0]['description'],
+                'icon' : r['weather'][0]['icon'],
+            }
 
-        city_weather = {
-            'city' : city.name,
-            'temperature' : r['main']['temp'],
-            'description' : r['weather'][0]['description'],
-            'icon' : r['weather'][0]['icon'],
-        }
-
-        weather_data.append(city_weather)
+            weather_data.append(city_weather)
 
     context = {'weather_data' : weather_data, 'form' : form}
     return render(request, 'weather/weather.html', context)
