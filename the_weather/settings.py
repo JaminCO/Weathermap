@@ -70,6 +70,7 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'the_weather.wsgi.application'
 
+CSRF_TRUSTED_ORIGINS = ["https://weatherapp.echendu.repl.co"]
 
 # Database
 # https://docs.djangoproject.com/en/2.0/ref/settings/#databases
